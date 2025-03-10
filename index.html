@@ -26,8 +26,14 @@
 
         // Carrega os dados dos jogadores do JSON
         async function carregarJogadores() {
-            const response = await fetch("jogadores.json");
-            jogadoresLista = await response.json();
+            try {
+                const response = await fetch("jogadores.json");
+                if (!response.ok) throw new Error("Erro ao carregar jogadores.json");
+                jogadoresLista = await response.json();
+            } catch (error) {
+                console.error("Erro ao carregar JSON:", error);
+                document.getElementById("resultado").innerText = "Erro ao carregar lista de jogadores!";
+            }
         }
 
         async function sortearTimes() {
@@ -46,23 +52,34 @@
                 return;
             }
 
-            const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer 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"
-                },
-                body: JSON.stringify({
-                    model: "gpt-4",
-                    messages: [
-                        { role: "system", content: "Você é um assistente que cria times equilibrados de futebol (2 zagueiros, 2 meias e 1 atacante) com base em uma lista de jogadores presentes. A soma das notas deve ser o mais equilibrada possível. Se faltar atacantes, meias podem ser usados nessa posição. Nenhum jogador pode ser repetido." },
-                        { role: "user", content: `Os jogadores presentes são:\n${JSON.stringify(jogadoresPresentes)}\n\nMonte os times seguindo essas regras.` }
-                    ]
-                })
-            });
+            try {
+                const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer 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"
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4",
+                        messages: [
+                            { role: "system", content: "Você é um assistente que cria times equilibrados de futebol (2 zagueiros, 2 meias e 1 atacante) com base em uma lista de jogadores presentes. A soma das notas deve ser o mais equilibrada possível. Se faltar atacantes, meias podem ser usados nessa posição. Nenhum jogador pode ser repetido." },
+                            { role: "user", content: `Os jogadores presentes são:\n${JSON.stringify(jogadoresPresentes)}\n\nMonte os times seguindo essas regras.` }
+                        ]
+                    })
+                });
 
-            const data = await response.json();
-            document.getElementById("resultado").innerText = data.choices[0].message.content;
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Erro da API:", data);
+                    throw new Error(data.error?.message || "Erro ao chamar API da OpenAI");
+                }
+
+                document.getElementById("resultado").innerText = data.choices?.[0]?.message?.content || "Erro ao processar resposta da API";
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                document.getElementById("resultado").innerText = "Erro ao se conectar com a API da OpenAI!";
+            }
         }
 
         carregarJogadores(); // Chama a função ao carregar a página
