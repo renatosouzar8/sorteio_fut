@@ -53,8 +53,9 @@ export default function App({ initialJogadores }: Props) {
   const [erro, setErro] = useState<string | null>(null)
 
   const confirmados = jogadores.filter(j => j.confirmado)
-  const nTimes = Math.floor(confirmados.length / 5)
-  const sobram = confirmados.length % 5
+  const campo = confirmados.filter(j => j.posicaoPrimaria !== 'goleiro')
+  const nTimes = Math.floor(campo.length / 5)
+  const sobram = campo.length % 5
 
   async function salvarJogador(data: Partial<Jogador>) {
     setErro(null)
@@ -112,9 +113,7 @@ export default function App({ initialJogadores }: Props) {
       const resultado = gerarDivisoes(jogadores)
       setDivisoes(resultado)
       if (resultado.length > 0) {
-        setTimeout(() => {
-          document.getElementById('resultado')?.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
       } else {
         setErro('Não foi possível montar times. Verifique se há pelo menos 10 jogadores confirmados.')
       }
@@ -139,14 +138,14 @@ export default function App({ initialJogadores }: Props) {
           <div className="flex gap-2">
             <button
               onClick={() => setModal({})}
-              className="px-3 py-2 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors"
+              className="px-3 py-2.5 min-h-[44px] rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors touch-manipulation"
             >
               + Jogador
             </button>
             <button
               onClick={sortear}
               disabled={nTimes < 2 || isPending}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 min-h-[44px] rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
             >
               {isPending ? 'Sorteando…' : '🎲 Sortear'}
             </button>
@@ -154,10 +153,17 @@ export default function App({ initialJogadores }: Props) {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
         {erro && (
           <div className="mb-4 p-3 rounded-lg bg-red-900/40 border border-red-500/30 text-red-300 text-sm">
             {erro}
+          </div>
+        )}
+
+        {/* Resultado aparece no topo, acima da lista de jogadores */}
+        {divisoes.length > 0 && (
+          <div className="mb-6">
+            <ResultadoSorteio divisoes={divisoes} onFechar={() => setDivisoes([])} />
           </div>
         )}
 
@@ -260,10 +266,6 @@ export default function App({ initialJogadores }: Props) {
           </div>
         )}
 
-        {/* Resultado */}
-        <div id="resultado">
-          <ResultadoSorteio divisoes={divisoes} onFechar={() => setDivisoes([])} />
-        </div>
       </main>
 
       {/* Modal */}
