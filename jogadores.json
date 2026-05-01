@@ -1,0 +1,21 @@
+[
+  { "nome": "Paulo", "posicao": "A", "nota": 1 },
+  { "nome": "Fernando", "posicao": "Z", "nota": 2 },
+  { "nome": "Lucas", "posicao": "Z", "nota": 2 },
+  { "nome": "Marquito", "posicao": "A", "nota": 3 },
+  { "nome": "Valentin", "posicao": "Z-A", "nota": 3 },
+  { "nome": "Claudinho", "posicao": "Z", "nota": 5 },
+  { "nome": "Ricardo Shrek", "posicao": "Z", "nota": 6 },
+  { "nome": "Márcio", "posicao": "M", "nota": 6 },
+  { "nome": "Laudo", "posicao": "Z", "nota": 6 },
+  { "nome": "João", "posicao": "Z-M", "nota": 6 },
+  { "nome": "Ricardo", "posicao": "M", "nota": 8 },
+  { "nome": "Alex", "posicao": "M", "nota": 8 },
+  { "nome": "Anderson", "posicao": "M", "nota": 7 },
+  { "nome": "Luciano", "posicao": "M-Z", "nota": 8.5 },
+  { "nome": "Renato Abreu", "posicao": "M", "nota": 7 },
+  { "nome": "Renato", "posicao": "M", "nota": 9 },
+  { "nome": "Felipe", "posicao": "M", "nota": 9 },
+  { "nome": "Rato", "posicao": "M", "nota": 9 },
+  { "nome": "Charles", "posicao": "M", "nota": 8 }
+]
