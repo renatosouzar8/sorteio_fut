@@ -65,10 +65,10 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
   const div = divisoes[0]
 
   function handleShare() {
-    let text = '🏆 SORTEIO DE TIMES 🏆\n\n'
+    let text = '🏆 *SORTEIO DE TIMES* 🏆\n\n'
 
     div.times.forEach((time, idx) => {
-      text += `Time ${idx + 1}:\n`
+      text += `*Time ${idx + 1}:*\n`
       const nomes = [
         ...time.formacao.atacante,
         ...time.formacao.meia,
@@ -85,14 +85,14 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
     })
 
     if (div.sobras && div.sobras.length > 0) {
-      text += `Sobraram:\n`
+      text += `*Sobraram:*\n`
       div.sobras.forEach(j => {
         text += `${j.nome}\n`
       })
       text += '\n'
     }
 
-    text += `⚖️ Equilíbrio: ${div.equilibrio.toFixed(0)}%`
+    text += `⚖️ *Equilíbrio:* ${div.equilibrio.toFixed(0)}%`
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`
     window.open(url, '_blank')
