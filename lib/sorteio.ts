@@ -164,15 +164,50 @@ function distribuirPorPosicao(confirmados: Jogador[], n: number, pickFn: PickFn)
   return validarDistribuicao(times) ? times : null
 }
 
-// Sorteio Controlado — 500 tentativas, seleciona aleatoriamente entre o top 30% de soluções
-// para garantir equilíbrio sem que o jogador mais forte caia sempre no mesmo time.
-function distribuicaoSorteio(confirmados: Jogador[], n: number): Jogador[][] | null {
+// Penalidade para evitar times repetidos
+function penSimilaridade(candidato: Jogador[][], anterior?: Jogador[][]): number {
+  if (!anterior) return 0
+  let penalty = 0
+  
+  const prevTeamMap = new Map<number, number>()
+  anterior.forEach((time, tIdx) => {
+    time.forEach(j => prevTeamMap.set(j.id, tIdx))
+  })
+
+  for (const time of candidato) {
+    const counts = new Map<number, number>()
+    for (const j of time) {
+      const prevIdx = prevTeamMap.get(j.id)
+      if (prevIdx !== undefined) {
+        counts.set(prevIdx, (counts.get(prevIdx) || 0) + 1)
+      }
+    }
+    for (const count of counts.values()) {
+      if (count > 2) {
+        penalty += (count - 2) * 15 // 3 players = 15, 4 players = 30
+      }
+    }
+  }
+  return penalty
+}
+
+// Sorteio Controlado — 500 tentativas, seleciona aleatoriamente dentro de uma margem de tolerância
+// para garantir equilíbrio, diversidade e dar chance às sobras.
+function distribuicaoSorteio(confirmados: Jogador[], n: number, anterior?: Jogador[][]): Jogador[][] | null {
   const candidates: Array<{ result: Jogador[][], score: number }> = []
 
+  const goleiros = confirmados.filter(j => j.posicaoPrimaria === 'goleiro')
+  const linha = confirmados.filter(j => j.posicaoPrimaria !== 'goleiro')
+
   for (let trial = 0; trial < 500; trial++) {
-    const shuffled = [...confirmados].sort(() => Math.random() - 0.5)
+    // Embaralha as linhas e pega apenas a quantidade exata (n * 5)
+    // Assim, se sobrarem jogadores, diferentes sobras ficam de fora a cada tentativa
+    const shuffledLinha = [...linha].sort(() => Math.random() - 0.5)
+    const participantesLinha = shuffledLinha.slice(0, n * 5)
+    const participantes = [...participantesLinha, ...goleiros]
+
     const result = distribuirPorPosicao(
-      shuffled,
+      participantes,
       n,
       (eligible) => eligible[Math.floor(Math.random() * eligible.length)]
     )
@@ -182,26 +217,31 @@ function distribuicaoSorteio(confirmados: Jogador[], n: number): Jogador[][] | n
     const media = forcas.reduce((a, b) => a + b, 0) / n
     const variancia = forcas.reduce((s, f) => s + (f - media) ** 2, 0) / n
     const penalty = result.reduce((s, t) => s + penalidadeFormacao(t), 0)
-    candidates.push({ result, score: variancia + penalty * 5 })
+    const simPenalty = penSimilaridade(result, anterior)
+    
+    candidates.push({ result, score: variancia + penalty * 5 + simPenalty })
   }
 
   if (!candidates.length) return null
 
-  // Ordena por score e escolhe aleatoriamente entre o top 30%
-  // Assim qualquer resultado equilibrado tem chance, não só o "ótimo" fixo
+  // Ordena por score e usa janela de tolerância de 40% em relação ao melhor
   candidates.sort((a, b) => a.score - b.score)
-  const topPool = candidates.slice(0, Math.max(1, Math.floor(candidates.length * 0.3)))
+  const bestScore = candidates[0].score
+  const limitScore = (bestScore + 2) * 1.40
+  
+  const topPool = candidates.filter(c => c.score <= limitScore)
   return topPool[Math.floor(Math.random() * topPool.length)].result
 }
 
-export function gerarDivisoes(jogadores: Jogador[]): Divisao[] {
+export function gerarDivisoes(jogadores: Jogador[], anterior?: Divisao[]): Divisao[] {
   const confirmados = jogadores.filter(j => j.confirmado)
   // Times são formados pelos jogadores de campo; goleiros entram como bônus depois
   const campoCount = confirmados.filter(j => j.posicaoPrimaria !== 'goleiro').length
   const n = Math.floor(campoCount / 5)
   if (n < 2) return []
 
-  const raw = distribuicaoSorteio(confirmados, n)
+  const prevTimes = anterior?.[0]?.times.map(t => t.jogadores)
+  const raw = distribuicaoSorteio(confirmados, n, prevTimes)
   if (!raw) return []
 
   const forcas = raw.map(calcularForcaTime)

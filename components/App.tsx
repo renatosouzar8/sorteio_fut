@@ -113,7 +113,7 @@ export default function App({ initialJogadores }: Props) {
   function sortear() {
     setErro(null)
     startTransition(() => {
-      const resultado = gerarDivisoes(jogadores)
+      const resultado = gerarDivisoes(jogadores, divisoes)
       setDivisoes(resultado)
       if (resultado.length > 0) {
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
