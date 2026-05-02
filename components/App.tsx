@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Jogador } from '@/types'
 import { gerarDivisoes } from '@/lib/sorteio'
 import ModalJogador from './ModalJogador'
+import ModalAdmin from './ModalAdmin'
 import ResultadoSorteio from './ResultadoSorteio'
 import type { Divisao } from '@/types'
 
@@ -48,6 +49,8 @@ interface Props {
 export default function App({ initialJogadores }: Props) {
   const [jogadores, setJogadores] = useState<Jogador[]>(initialJogadores)
   const [modal, setModal] = useState<Partial<Jogador> | null>(null)
+  const [modalAdminOpen, setModalAdminOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [divisoes, setDivisoes] = useState<Divisao[]>([])
   const [isPending, startTransition] = useTransition()
   const [erro, setErro] = useState<string | null>(null)
@@ -136,12 +139,30 @@ export default function App({ initialJogadores }: Props) {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setModal({})}
-              className="px-3 py-2.5 min-h-[44px] rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors touch-manipulation"
-            >
-              + Jogador
-            </button>
+            {isAdmin ? (
+              <button
+                onClick={() => setIsAdmin(false)}
+                className="px-3 py-2.5 min-h-[44px] rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 text-sm font-semibold transition-colors touch-manipulation flex items-center gap-1"
+                title="Sair do modo Admin"
+              >
+                <span>✅</span> Admin
+              </button>
+            ) : (
+              <button
+                onClick={() => setModalAdminOpen(true)}
+                className="px-3 py-2.5 min-h-[44px] rounded-lg border border-slate-700 text-slate-400 hover:text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors touch-manipulation flex items-center gap-1"
+              >
+                <span>🔐</span> Admin
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setModal({})}
+                className="px-3 py-2.5 min-h-[44px] rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors touch-manipulation"
+              >
+                + Jogador
+              </button>
+            )}
             <button
               onClick={sortear}
               disabled={nTimes < 2 || isPending}
@@ -172,12 +193,14 @@ export default function App({ initialJogadores }: Props) {
             <div className="text-6xl mb-4">⚽</div>
             <p className="text-slate-400 text-lg mb-2">Nenhum jogador cadastrado</p>
             <p className="text-slate-600 text-sm mb-6">Adicione jogadores para começar</p>
-            <button
-              onClick={() => setModal({})}
-              className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors"
-            >
-              + Adicionar primeiro jogador
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setModal({})}
+                className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors"
+              >
+                + Adicionar primeiro jogador
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -209,17 +232,17 @@ export default function App({ initialJogadores }: Props) {
                 </div>
 
                 {/* Nível */}
-                <NivelBar nivel={j.nivel} />
+                {isAdmin && <NivelBar nivel={j.nivel} />}
 
                 {/* Badges especiais */}
-                {(j.isGoleiroDestaque || j.isJogadorProblema) && (
+                {(j.isGoleiroDestaque || (isAdmin && j.isJogadorProblema)) && (
                   <div className="flex gap-1 mt-2">
                     {j.isGoleiroDestaque && (
                       <span className="text-xs bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 px-2 py-0.5 rounded-full">
                         ⭐ Destaque
                       </span>
                     )}
-                    {j.isJogadorProblema && (
+                    {isAdmin && j.isJogadorProblema && (
                       <span className="text-xs bg-red-500/20 border border-red-500/30 text-red-300 px-2 py-0.5 rounded-full">
                         ⚠️ Fraco
                       </span>
@@ -239,41 +262,58 @@ export default function App({ initialJogadores }: Props) {
                   >
                     {j.confirmado ? '✓ Confirmado' : 'Confirmar'}
                   </button>
-                  <button
-                    onClick={() => setModal(j)}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-slate-700 border border-slate-600 text-slate-300 hover:bg-slate-600 transition-colors"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => excluirJogador(j.id)}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-red-900/30 border border-red-800/30 text-red-400 hover:bg-red-900/60 transition-colors"
-                  >
-                    🗑️
-                  </button>
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => setModal(j)}
+                        className="px-3 py-1.5 text-xs rounded-lg bg-slate-700 border border-slate-600 text-slate-300 hover:bg-slate-600 transition-colors"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => excluirJogador(j.id)}
+                        className="px-3 py-1.5 text-xs rounded-lg bg-red-900/30 border border-red-800/30 text-red-400 hover:bg-red-900/60 transition-colors"
+                      >
+                        🗑️
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
 
             {/* Botão adicionar inline */}
-            <button
-              onClick={() => setModal({})}
-              className="rounded-xl border-2 border-dashed border-slate-700 hover:border-emerald-600 text-slate-600 hover:text-emerald-500 transition-colors flex items-center justify-center gap-2 p-4 min-h-[140px]"
-            >
-              <span className="text-2xl">+</span>
-              <span className="text-sm font-medium">Novo jogador</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setModal({})}
+                className="rounded-xl border-2 border-dashed border-slate-700 hover:border-emerald-600 text-slate-600 hover:text-emerald-500 transition-colors flex items-center justify-center gap-2 p-4 min-h-[140px]"
+              >
+                <span className="text-2xl">+</span>
+                <span className="text-sm font-medium">Novo jogador</span>
+              </button>
+            )}
           </div>
         )}
 
       </main>
 
-      {/* Modal */}
+      {/* Modal de Jogador */}
       {modal !== null && (
         <ModalJogador
           jogador={modal}
           onSave={salvarJogador}
           onClose={() => setModal(null)}
+        />
+      )}
+
+      {/* Modal Admin */}
+      {modalAdminOpen && (
+        <ModalAdmin
+          onLogin={() => {
+            setIsAdmin(true)
+            setModalAdminOpen(false)
+          }}
+          onClose={() => setModalAdminOpen(false)}
         />
       )}
     </div>
