@@ -182,11 +182,11 @@ function penSimilaridade(candidato: Jogador[][], anterior?: Jogador[][]): number
         counts.set(prevIdx, (counts.get(prevIdx) || 0) + 1)
       }
     }
-    for (const count of counts.values()) {
+    counts.forEach(count => {
       if (count > 2) {
         penalty += (count - 2) * 15 // 3 players = 15, 4 players = 30
       }
-    }
+    })
   }
   return penalty
 }
