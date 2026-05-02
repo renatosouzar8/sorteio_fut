@@ -6,6 +6,12 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient()
+  new PrismaClient({
+    datasources: {
+      db: {
+        url: "postgresql://postgres.jowpixphwzvpkcscrntl:SorteioFut2026@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+      }
+    }
+  })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
