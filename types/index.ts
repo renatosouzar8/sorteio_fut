@@ -31,4 +31,5 @@ export interface Divisao {
   equilibrio: number
   diferencaMaxima: number
   desvioPadrao: number
+  sobras: Jogador[]
 }

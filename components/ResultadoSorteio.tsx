@@ -69,20 +69,20 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-lg font-bold text-white">Times Sorteados</h2>
-          {isAdmin && (
-            <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-              <span>
-                Equilíbrio:{' '}
-                <span className={`font-semibold ${div.equilibrio >= 90 ? 'text-emerald-400' : div.equilibrio >= 75 ? 'text-yellow-400' : 'text-red-400'}`}>
-                  {div.equilibrio.toFixed(0)}%
-                </span>
+          <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+            <span>
+              Equilíbrio:{' '}
+              <span className={`font-semibold ${div.equilibrio >= 90 ? 'text-emerald-400' : div.equilibrio >= 75 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {div.equilibrio.toFixed(0)}%
               </span>
+            </span>
+            {isAdmin && (
               <span>
                 Dif. máx:{' '}
                 <span className="text-slate-300 font-medium">{div.diferencaMaxima.toFixed(1)}</span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <button
           onClick={onFechar}
@@ -97,6 +97,25 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
           <CardTime key={tIdx} time={time} idx={tIdx} forca={div.forcas[tIdx]} isAdmin={isAdmin} />
         ))}
       </div>
+
+      {div.sobras && div.sobras.length > 0 && (
+        <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700 border-dashed">
+          <h3 className="text-sm font-semibold text-slate-400 mb-3 flex items-center gap-2">
+            <span>⏳</span> Ficaram de fora neste sorteio:
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {div.sobras.map(j => (
+              <div key={j.id} className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
+                <span className="text-sm text-slate-300 font-medium">{j.nome}</span>
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                  {j.posicaoPrimaria}
+                </span>
+                {isAdmin && <NivelBadge nivel={j.nivel} />}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -251,6 +251,9 @@ export function gerarDivisoes(jogadores: Jogador[], anterior?: Divisao[]): Divis
   const diff = Math.max(...forcas) - Math.min(...forcas)
   const pct = media > 0 ? (diff / media) * 100 : 0
 
+  const drawnPlayerIds = new Set(raw.flat().map(j => j.id))
+  const sobras = confirmados.filter(j => !drawnPlayerIds.has(j.id))
+
   return [{
     algoritmo: 'Sorteio Controlado',
     times: raw.map((t, i) => buildTime(t, forcas[i])),
@@ -258,5 +261,6 @@ export function gerarDivisoes(jogadores: Jogador[], anterior?: Divisao[]): Divis
     equilibrio: 100 - pct,
     diferencaMaxima: diff,
     desvioPadrao,
+    sobras,
   }]
 }
