@@ -70,22 +70,22 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
     div.times.forEach((time, idx) => {
       text += `*Time ${idx + 1}*\n`
       const formacoes = [
-        { label: '⚽ Atacantes', key: 'atacante' as const },
+        { label: '⚽ Atacante', key: 'atacante' as const },
         { label: '🎯 Meias', key: 'meia' as const },
         { label: '🛡️ Zagueiros', key: 'zagueiro' as const },
-        { label: '🧤 Goleiros', key: 'goleiro' as const }
+        { label: '🧤 Goleiro', key: 'goleiro' as const }
       ]
 
       formacoes.forEach(({ label, key }) => {
         const jogadores = time.formacao[key]
         if (jogadores && jogadores.length > 0) {
-          const nomes = jogadores.map(j => {
+          text += `${label}:\n`
+          jogadores.forEach(j => {
             let nome = j.nome
             if (j.isGoleiroDestaque) nome += ' ⭐'
             if (j.posicaoPrimaria !== key) nome += ' (A)'
-            return nome
-          }).join(', ')
-          text += `${label}: ${nomes}\n`
+            text += `${nome}\n`
+          })
         }
       })
       text += '\n'
