@@ -64,6 +64,47 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
   if (!divisoes.length) return null
   const div = divisoes[0]
 
+  function handleShare() {
+    let text = '🏆 *SORTEIO DE TIMES* 🏆\n\n'
+
+    div.times.forEach((time, idx) => {
+      text += `*Time ${idx + 1}*\n`
+      const formacoes = [
+        { label: '⚽ Atacantes', key: 'atacante' as const },
+        { label: '🎯 Meias', key: 'meia' as const },
+        { label: '🛡️ Zagueiros', key: 'zagueiro' as const },
+        { label: '🧤 Goleiros', key: 'goleiro' as const }
+      ]
+
+      formacoes.forEach(({ label, key }) => {
+        const jogadores = time.formacao[key]
+        if (jogadores && jogadores.length > 0) {
+          const nomes = jogadores.map(j => {
+            let nome = j.nome
+            if (j.isGoleiroDestaque) nome += ' ⭐'
+            if (j.posicaoPrimaria !== key) nome += ' (A)'
+            return nome
+          }).join(', ')
+          text += `${label}: ${nomes}\n`
+        }
+      })
+      text += '\n'
+    })
+
+    if (div.sobras && div.sobras.length > 0) {
+      text += `⏳ *Ficaram de fora (banco):*\n`
+      div.sobras.forEach(j => {
+        text += `- ${j.nome} (${j.posicaoPrimaria})\n`
+      })
+      text += '\n'
+    }
+
+    text += `⚖️ Equilíbrio: ${div.equilibrio.toFixed(0)}%\n`
+
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`
+    window.open(url, '_blank')
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
@@ -84,12 +125,23 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
             )}
           </div>
         </div>
-        <button
-          onClick={onFechar}
-          className="text-slate-400 hover:text-white text-sm border border-slate-600 px-3 py-2 min-h-[40px] rounded-lg transition-colors touch-manipulation"
-        >
-          Fechar
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 text-white bg-green-600 hover:bg-green-500 text-sm font-semibold px-3 py-2 min-h-[40px] rounded-lg transition-colors touch-manipulation"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+            WhatsApp
+          </button>
+          <button
+            onClick={onFechar}
+            className="text-slate-400 hover:text-white text-sm border border-slate-600 px-3 py-2 min-h-[40px] rounded-lg transition-colors touch-manipulation"
+          >
+            Fechar
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
