@@ -65,25 +65,31 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
   const div = divisoes[0]
 
   function handleShare() {
-    let text = '🏆 *SORTEIO DE TIMES* 🏆\n\n'
+    let text = '🏆 SORTEIO DE TIMES 🏆\n\n'
 
     div.times.forEach((time, idx) => {
+      text += `Time ${idx + 1}:\n`
       const nomes = [
         ...time.formacao.atacante,
         ...time.formacao.meia,
         ...time.formacao.zagueiro,
         ...time.formacao.goleiro
-      ].map(j => {
+      ]
+
+      nomes.forEach(j => {
         let n = j.nome
         if (j.isGoleiroDestaque) n += ' ⭐'
-        return n
-      }).join(', ')
-
-      text += `*Time ${idx + 1}:*\n${nomes}\n\n`
+        text += `${n}\n`
+      })
+      text += '\n'
     })
 
     if (div.sobras && div.sobras.length > 0) {
-      text += `*Sobras:*\n${div.sobras.map(j => j.nome).join(', ')}\n\n`
+      text += `Sobraram:\n`
+      div.sobras.forEach(j => {
+        text += `${j.nome}\n`
+      })
+      text += '\n'
     }
 
     text += `⚖️ Equilíbrio: ${div.equilibrio.toFixed(0)}%`
