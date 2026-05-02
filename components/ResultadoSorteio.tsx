@@ -68,38 +68,25 @@ export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props)
     let text = '🏆 *SORTEIO DE TIMES* 🏆\n\n'
 
     div.times.forEach((time, idx) => {
-      text += `*Time ${idx + 1}*\n`
-      const formacoes = [
-        { label: '⚽ Atacante', key: 'atacante' as const },
-        { label: '🎯 Meias', key: 'meia' as const },
-        { label: '🛡️ Zagueiros', key: 'zagueiro' as const },
-        { label: '🧤 Goleiro', key: 'goleiro' as const }
-      ]
+      const nomes = [
+        ...time.formacao.atacante,
+        ...time.formacao.meia,
+        ...time.formacao.zagueiro,
+        ...time.formacao.goleiro
+      ].map(j => {
+        let n = j.nome
+        if (j.isGoleiroDestaque) n += ' ⭐'
+        return n
+      }).join(', ')
 
-      formacoes.forEach(({ label, key }) => {
-        const jogadores = time.formacao[key]
-        if (jogadores && jogadores.length > 0) {
-          text += `${label}:\n`
-          jogadores.forEach(j => {
-            let nome = j.nome
-            if (j.isGoleiroDestaque) nome += ' ⭐'
-            if (j.posicaoPrimaria !== key) nome += ' (A)'
-            text += `${nome}\n`
-          })
-        }
-      })
-      text += '\n'
+      text += `*Time ${idx + 1}:*\n${nomes}\n\n`
     })
 
     if (div.sobras && div.sobras.length > 0) {
-      text += `⏳ *Ficaram de fora (banco):*\n`
-      div.sobras.forEach(j => {
-        text += `- ${j.nome} (${j.posicaoPrimaria})\n`
-      })
-      text += '\n'
+      text += `*Sobras:*\n${div.sobras.map(j => j.nome).join(', ')}\n\n`
     }
 
-    text += `⚖️ Equilíbrio: ${div.equilibrio.toFixed(0)}%\n`
+    text += `⚖️ Equilíbrio: ${div.equilibrio.toFixed(0)}%`
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`
     window.open(url, '_blank')
