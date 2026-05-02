@@ -4,6 +4,7 @@ import { Divisao, Jogador } from '@/types'
 
 interface Props {
   divisoes: Divisao[]
+  isAdmin: boolean
   onFechar: () => void
 }
 
@@ -17,7 +18,7 @@ function NivelBadge({ nivel }: { nivel: number }) {
   )
 }
 
-function CardTime({ time, idx, forca }: { time: Divisao['times'][0]; idx: number; forca: number }) {
+function CardTime({ time, idx, forca, isAdmin }: { time: Divisao['times'][0]; idx: number; forca: number; isAdmin: boolean }) {
   const secoes = [
     { label: '⚽ Atacante', key: 'atacante' as const, cor: 'border-green-500/30 bg-green-900/20' },
     { label: '🎯 Meias', key: 'meia' as const, cor: 'border-blue-500/30 bg-blue-900/20' },
@@ -29,7 +30,7 @@ function CardTime({ time, idx, forca }: { time: Divisao['times'][0]; idx: number
     <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-600">
         <span className="font-bold text-white text-base">Time {idx + 1}</span>
-        <span className="text-sm font-semibold text-yellow-400">⚡ {forca.toFixed(1)}</span>
+        {isAdmin && <span className="text-sm font-semibold text-yellow-400">⚡ {forca.toFixed(1)}</span>}
       </div>
       <div className="p-3 space-y-2">
         {secoes.map(({ label, key, cor }) => {
@@ -43,12 +44,12 @@ function CardTime({ time, idx, forca }: { time: Divisao['times'][0]; idx: number
                   <span className="text-sm text-slate-200 flex items-center gap-1">
                     {j.nome}
                     {j.isGoleiroDestaque && <span className="text-yellow-400 text-xs">⭐</span>}
-                    {j.isJogadorProblema && <span className="text-red-400 text-xs">⚠️</span>}
+                    {isAdmin && j.isJogadorProblema && <span className="text-red-400 text-xs">⚠️</span>}
                     {j.posicaoPrimaria !== key && (
                       <span className="text-slate-500 text-xs">(A)</span>
                     )}
                   </span>
-                  <NivelBadge nivel={j.nivel} />
+                  {isAdmin && <NivelBadge nivel={j.nivel} />}
                 </div>
               ))}
             </div>
@@ -59,7 +60,7 @@ function CardTime({ time, idx, forca }: { time: Divisao['times'][0]; idx: number
   )
 }
 
-export default function ResultadoSorteio({ divisoes, onFechar }: Props) {
+export default function ResultadoSorteio({ divisoes, isAdmin, onFechar }: Props) {
   if (!divisoes.length) return null
   const div = divisoes[0]
 
@@ -68,18 +69,20 @@ export default function ResultadoSorteio({ divisoes, onFechar }: Props) {
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-lg font-bold text-white">Times Sorteados</h2>
-          <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-            <span>
-              Equilíbrio:{' '}
-              <span className={`font-semibold ${div.equilibrio >= 90 ? 'text-emerald-400' : div.equilibrio >= 75 ? 'text-yellow-400' : 'text-red-400'}`}>
-                {div.equilibrio.toFixed(0)}%
+          {isAdmin && (
+            <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+              <span>
+                Equilíbrio:{' '}
+                <span className={`font-semibold ${div.equilibrio >= 90 ? 'text-emerald-400' : div.equilibrio >= 75 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {div.equilibrio.toFixed(0)}%
+                </span>
               </span>
-            </span>
-            <span>
-              Dif. máx:{' '}
-              <span className="text-slate-300 font-medium">{div.diferencaMaxima.toFixed(1)}</span>
-            </span>
-          </div>
+              <span>
+                Dif. máx:{' '}
+                <span className="text-slate-300 font-medium">{div.diferencaMaxima.toFixed(1)}</span>
+              </span>
+            </div>
+          )}
         </div>
         <button
           onClick={onFechar}
@@ -91,7 +94,7 @@ export default function ResultadoSorteio({ divisoes, onFechar }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {div.times.map((time, tIdx) => (
-          <CardTime key={tIdx} time={time} idx={tIdx} forca={div.forcas[tIdx]} />
+          <CardTime key={tIdx} time={time} idx={tIdx} forca={div.forcas[tIdx]} isAdmin={isAdmin} />
         ))}
       </div>
     </div>

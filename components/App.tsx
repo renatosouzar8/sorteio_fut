@@ -184,7 +184,7 @@ export default function App({ initialJogadores }: Props) {
         {/* Resultado aparece no topo, acima da lista de jogadores */}
         {divisoes.length > 0 && (
           <div className="mb-6">
-            <ResultadoSorteio divisoes={divisoes} onFechar={() => setDivisoes([])} />
+            <ResultadoSorteio divisoes={divisoes} isAdmin={isAdmin} onFechar={() => setDivisoes([])} />
           </div>
         )}
 
